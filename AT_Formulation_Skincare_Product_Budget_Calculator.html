@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A&T Formulation – Skincare Product Budget Calculator</title>
+<style>
+:root{--text:#18202a;--muted:#68727d;--border:#dfe3e7;--accent:#1f5f78;--accentbg:#e7f1f5;--soft:#f7f7f5;--good:#2d6a4f;--bad:#9b2c2c}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#fff}
+.wrap{width:100%;max-width:none;margin:0;padding:28px 0 50px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.03em}.lead{color:var(--muted);line-height:1.6;margin:0 0 24px;font-size:15px}
+.section{border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:15px}
+.section h2{font-size:18px;margin:0 0 15px}.lead-capture a{color:var(--accent);text-decoration:underline}.lead-capture a:hover{text-decoration:none}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.full{grid-column:1/-1}
+.label{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
+.help{font-size:11px;color:var(--muted);line-height:1.45;margin-top:6px}
+select,input[type=number]{width:100%;height:46px;border:1px solid var(--border);border-radius:9px;background:#fff;padding:0 12px;font-size:16px;color:var(--text)}
+.options{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.option{position:relative}.option input{position:absolute;opacity:0}
+.option label{display:flex;align-items:center;justify-content:center;text-align:center;min-height:48px;border:1px solid var(--border);border-radius:9px;padding:8px;font-size:13px;cursor:pointer}
+.option input:checked+label{border-color:var(--accent);background:var(--accentbg);font-weight:700}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:7px}.check{display:flex;align-items:center;gap:9px;min-height:42px;font-size:14px}.check input{width:18px;height:18px;accent-color:var(--accent)}
+.skin{margin-top:12px}.skin .options{grid-template-columns:1fr 1fr}
+.range-line{display:flex;justify-content:space-between;align-items:center;font-size:14px}.range-value{font-weight:700}
+input[type=range]{width:100%;accent-color:var(--accent);margin:12px 0 5px}.scale{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}
+.calculate{display:block;width:100%;height:52px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin:20px 0}
+.calculate:hover{filter:brightness(.96)}
+.result{background:var(--soft);border:1px solid var(--border);border-radius:16px;padding:22px;margin-top:18px}
+.kicker{text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:700;color:var(--muted)}
+.total{font-size:40px;font-weight:750;letter-spacing:-.04em;margin:9px 0}
+.unit{font-size:14px;color:var(--muted)}.unit strong{display:block;color:var(--text);font-size:23px;margin-top:2px}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.metric{border:1px solid var(--border);background:#fff;border-radius:10px;padding:13px}.metric span{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}.metric strong{font-size:18px}
+.status{margin-top:16px;padding:0;font-size:14px;line-height:1.5;font-weight:700}.status.good{color:#2d6a4f}.status.bad{color:#9b2c2c}.status.neutral{color:var(--text)}
+.notes{border-left:3px solid var(--accent);padding:3px 0 3px 12px;color:var(--muted);font-size:12px;line-height:1.6;margin-top:16px}
+.disclaimer{font-size:11px;color:var(--muted);line-height:1.55;margin-top:16px}
+.cta{margin-top:18px;text-align:center;padding:17px;border-top:1px solid var(--border);font-size:14px;line-height:1.5}.cta strong{display:block;font-size:16px;margin-bottom:5px}.cta a{color:var(--accent);text-decoration:none}.cta a:hover{text-decoration:underline}
+.reset{height:44px;border:1px solid var(--border);background:#fff;border-radius:9px;padding:0 14px;font-weight:700;cursor:pointer;margin-top:12px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+@media(max-width:470px){.options,.checks,.metrics{grid-template-columns:1fr!important}.wrap{padding:20px 12px}.total{font-size:34px}}
+.lead-capture input[type=text],.lead-capture input[type=email]{width:100%;height:46px;border:1px solid var(--border);border-radius:9px;background:#fff;padding:0 12px;font-size:16px;color:var(--text)}.lead-capture input[type=text]:focus,.lead-capture input[type=email]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(31,95,120,.08)}</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Skincare Product Budget Calculator</h1>
+<p class="lead">Estimate the approximate investment required to develop and launch your cosmetic product — and see whether your planned retail price could make the project commercially viable.</p>
+
+<div id="calculator">
+
+
+<div class="section">
+<h2>1. Commercial plan</h2>
+<div class="grid">
+<div>
+<label class="label" for="retailPrice">Planned retail price per unit (€)</label>
+<input id="retailPrice" type="number" min="0" max="100000" step="0.01" placeholder="e.g. 35">
+<div class="help">Enter your planned selling price per unit, before VAT.</div>
+</div>
+<div>
+<label class="label" for="quantity">Planned production quantity</label>
+<input id="quantity" type="number" min="1000" max="100000" step="100" value="2000">
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>2. Product</h2>
+<div class="grid">
+<div>
+<label class="label" for="productType">Product type</label>
+<select id="productType">
+<optgroup label="Skin Care">
+<option value="1.40" data-size="50">Day Cream</option>
+<option value="1.30" data-size="50">Day Fluid</option>
+<option value="1.50" data-size="50">Night Cream</option>
+<option value="1.50" data-size="50">Rich Butter</option>
+<option value="1.10" data-size="100">Scrub / Dermabrasion</option>
+<option value="0.80" data-size="150">Cleanser</option>
+<option value="0.80" data-size="150">Toner</option>
+<option value="1.00" data-size="100">Mousse</option>
+<option value="1.10" data-size="30">Serum</option>
+<option value="1.10" data-size="30">Facial Oil</option>
+<option value="1.00" data-size="50">Gel</option>
+<option value="1.20" data-size="50">Mask</option>
+<option value="0.90" data-size="15">Spot Treatment</option>
+<option value="1.40" data-size="50">Firming</option>
+<option value="1.50" data-size="50">Anti-wrinkle</option>
+<option value="1.40" data-size="50">Hydration Boosting</option>
+<option value="0.80" data-size="150">Make-up Remover</option>
+<option value="1.10" data-size="100">Exfoliating</option>
+<option value="1.30" data-size="50">Balm</option>
+<option value="0.80" data-size="150">Micellar Water</option>
+</optgroup>
+<optgroup label="Makeup">
+<option value="1.70" data-size="30">Cream Foundation</option>
+<option value="1.30" data-size="10">Concealer</option>
+<option value="1.50" data-size="30">BB Cream</option>
+<option value="1.60" data-size="30">CC Cream</option>
+<option value="1.40" data-size="10">Bronzer</option>
+</optgroup>
+<optgroup label="Body Care">
+<option value="1.10" data-size="200">Body Cream</option>
+<option value="0.90" data-size="200">Body Lotion</option>
+<option value="1.20" data-size="200">Body Butter</option>
+<option value="1.00" data-size="200">Body Mousse</option>
+<option value="0.90" data-size="200">Body Gel</option>
+<option value="1.10" data-size="200">Body Scrub</option>
+<option value="1.20" data-size="100">Body Serum</option>
+<option value="1.10" data-size="100">Body Oil</option>
+<option value="1.20" data-size="200">Body Mask</option>
+<option value="1.40" data-size="100">Scar & Stretch-Mark Treatment</option>
+<option value="1.10" data-size="200">Exfoliating Scrub</option>
+<option value="1.20" data-size="100">Body Shimmer</option>
+<option value="1.20" data-size="100">Body Balm</option>
+</optgroup>
+<optgroup label="Bath & Spa">
+<option value="0.80" data-size="250">Bubble Bath</option>
+<option value="0.90" data-size="250">Bath Cream</option>
+<option value="1.00" data-size="100">Bath Oil</option>
+<option value="0.80" data-size="250">Shower Gel</option>
+<option value="0.90" data-size="250">Shower Cream</option>
+<option value="1.00" data-size="250">Shower Oil</option>
+</optgroup>
+<optgroup label="Hand & Footcare">
+<option value="0.90" data-size="75">Hand / Foot Cream</option>
+<option value="0.80" data-size="75">Hand / Foot Lotion</option>
+<option value="1.00" data-size="100">Hand / Foot Scrub</option>
+<option value="0.80" data-size="75">Hand / Foot Gel</option>
+<option value="1.10" data-size="75">Hand / Foot Treatment</option>
+<option value="1.00" data-size="75">Hand / Foot Balm</option>
+</optgroup>
+<optgroup label="Eyes & Brows">
+<option value="1.10" data-size="10">Eye Primer</option>
+<option value="1.10" data-size="15">Eye Gel</option>
+<option value="1.10" data-size="10">Brow Wax</option>
+<option value="1.00" data-size="10">Brow Gel</option>
+</optgroup>
+<optgroup label="Lips">
+<option value="1.10" data-size="10">Lip Gloss</option>
+<option value="0.80" data-size="5">Lip Balm</option>
+</optgroup>
+<optgroup label="Men's Grooming">
+<option value="1.30" data-size="50">Men's Moisturiser</option>
+<option value="0.80" data-size="150">Men's Wash</option>
+<option value="1.10" data-size="100">Men's Scrub</option>
+<option value="1.00" data-size="100">Men's Gel</option>
+<option value="1.10" data-size="50">Men's Oil</option>
+<option value="1.10" data-size="75">Pre-Shave Treatment</option>
+<option value="0.90" data-size="150">Shaving Gel</option>
+<option value="1.00" data-size="100">Shaving Cream</option>
+<option value="1.00" data-size="100">Men's Lotion</option>
+</optgroup>
+<optgroup label="Haircare">
+<option value="0.80" data-size="250">Shampoo</option>
+<option value="0.90" data-size="250">Conditioner</option>
+<option value="1.10" data-size="150">Hair Treatment</option>
+<option value="1.20" data-size="50">Hair Serum</option>
+<option value="1.10" data-size="50">Hair Oil</option>
+<option value="1.10" data-size="250">Hair Mask</option>
+<option value="1.00" data-size="150">Hair Cream</option>
+<option value="1.10" data-size="100">Hair Wax</option>
+<option value="0.90" data-size="150">Sea Salt Spray</option>
+<option value="1.10" data-size="100">Pomade</option>
+</optgroup>
+<optgroup label="Other">
+<option value="1.40" data-size="50">Other / Custom</option>
+</optgroup>
+</select>
+</div>
+<div>
+<label class="label" for="size">Product size</label>
+<div style="display:flex;gap:8px">
+<input id="size" type="number" min="5" max="2000" step="1">
+<select id="sizeUnit" style="max-width:110px">
+<option value="ml">ml</option>
+<option value="g">g</option>
+</select>
+</div>
+<div class="help" id="standardSizeHelp">The selected product type has a typical reference size used for the estimate.</div>
+</div>
+<div class="full">
+<label class="label" for="development">Formulation complexity</label>
+<select id="development">
+<option value="2500">Standard formulation</option>
+<option value="3000">Special / complex formulation</option>
+</select>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>3. Packaging</h2>
+<div class="grid">
+<div class="full">
+<label class="label">Primary packaging</label>
+<div class="options">
+<div class="option"><input id="plastic" name="pack" value=".7" type="radio" checked><label for="plastic">Plastic bottle / tube (HDPE or PE)</label></div>
+<div class="option"><input id="glass" name="pack" value="1.4" type="radio"><label for="glass">Glass bottle / glass jar</label></div>
+<div class="option"><input id="airless" name="pack" value="1.9" type="radio"><label for="airless">Plastic airless bottle or jar / other packaging</label></div>
+</div>
+</div>
+<div>
+<label class="label">Packaging customization</label>
+<div class="checks">
+<label class="check"><input id="colour" type="checkbox"> Custom colouring</label>
+<label class="check"><input id="printing" type="checkbox"> Custom printing</label>
+</div>
+<div class="help">Customization costs are added to the selected primary packaging.</div>
+</div>
+<div>
+<label class="label">Secondary packaging</label>
+<label class="check"><input id="box" type="checkbox"> Product box</label>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>4. Testing</h2>
+<div class="checks">
+<label class="check"><input id="micro" type="checkbox" checked> Microbiological testing</label>
+<label class="check"><input id="challenge" type="checkbox" checked> Challenge testing</label>
+<label class="check"><input id="stability" type="checkbox" checked> Stability testing</label>
+<label class="check"><input id="derm" type="checkbox"> Dermatological testing</label>
+<label class="check"><input id="inuse" type="checkbox"> In-use testing</label>
+</div>
+<div class="skin">
+<label class="label">Test subject skin type</label>
+<div class="options">
+<div class="option"><input id="normal" name="skin" value="normal" type="radio" checked><label for="normal">Normal skin</label></div>
+<div class="option"><input id="sensitive" name="skin" value="sensitive" type="radio"><label for="sensitive">Sensitive skin</label></div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>5. Brand & regulatory</h2>
+<div class="grid">
+<div>
+<label class="label">Additional target markets outside the EU</label>
+<select id="markets">
+<option value="0">EU only</option>
+<option value="1">EU + 1 additional market</option>
+<option value="2">EU + 2 additional markets</option>
+<option value="3">EU + 3 additional markets</option>
+</select>
+</div>
+<div>
+<label class="label">Trademark registration</label>
+<label class="check"><input id="trademark" type="checkbox"> Include trademark registration</label>
+</div>
+<div class="full">
+<div class="range-line"><span class="label" style="margin:0">Graphic design budget</span><span id="designValue" class="range-value">€1,500</span></div>
+<input id="design" type="range" min="500" max="5000" step="250" value="1500">
+<div class="scale"><span>€500</span><span>€5,000</span></div>
+</div>
+</div>
+</div>
+
+<div class="section lead-capture">
+<h2>Your details</h2>
+<div class="grid">
+<div>
+<label class="label" for="leadFirstName">First name</label>
+<input id="leadFirstName" name="First name" type="text" autocomplete="given-name" required>
+</div><div>
+<label class="label" for="leadLastName">Last name</label>
+<input id="leadLastName" name="Last name" type="text" autocomplete="family-name" required>
+</div>
+<div>
+<label class="label" for="leadEmail">Email address</label>
+<input id="leadEmail" name="Email" type="email" autocomplete="email" required>
+</div>
+<div class="full">
+<label class="check"><input id="consent" name="Consent" type="checkbox" required> I agree to <a href="https://www.atformulation.com/legal/terms-and-conditions" target="_blank" rel="noopener">Terms and conditions</a> and <a href="https://www.atformulation.com/legal/privacy-policy" target="_blank" rel="noopener">Privacy Policy.</a></label>
+</div>
+</div>
+<input type="hidden" id="hFullName" name="Name" value="">
+<input type="hidden" name="Calculator" value="Skincare Product Budget Calculator">
+<input type="hidden" id="hRetail" name="Planned retail price" value="">
+<input type="hidden" id="hQuantity" name="Planned production quantity" value="">
+<input type="hidden" id="hProduct" name="Product type" value="">
+<input type="hidden" id="hSize" name="Product size" value="">
+<input type="hidden" id="hDevelopment" name="Formulation complexity" value="">
+<input type="hidden" id="hPackaging" name="Primary packaging" value="">
+<input type="hidden" id="hColour" name="Custom colouring" value="">
+<input type="hidden" id="hPrinting" name="Custom printing" value="">
+<input type="hidden" id="hBox" name="Product box" value="">
+<input type="hidden" id="hTests" name="Testing selected" value="">
+<input type="hidden" id="hSkin" name="Test subject skin type" value="">
+<input type="hidden" id="hMarkets" name="Additional target markets" value="">
+<input type="hidden" id="hTrademark" name="Trademark registration" value="">
+<input type="hidden" id="hDesign" name="Graphic design budget" value="">
+<input type="hidden" id="hInvestment" name="Estimated initial investment" value="">
+<input type="hidden" id="hUnitCost" name="Estimated cost per unit" value="">
+<input type="hidden" id="hRevenue" name="Estimated revenue" value="">
+<input type="hidden" id="hProjectResult" name="Estimated project result" value="">
+<input type="hidden" id="hPriceAssessment" name="Price assessment" value="">
+</div>
+<button class="calculate" type="button">Calculate budget</button>
+<div id="submissionStatus" aria-live="polite" style="margin-top:10px;font-size:13px;text-align:center;"></div>
+</div>
+
+<div class="result" id="result">
+<div class="kicker">Estimated initial investment</div>
+<div class="total" id="total">—</div>
+<div class="unit">Estimated cost per unit<strong id="unit">—</strong></div>
+
+<div class="metrics" id="commercialMetrics" style="display:none">
+<div class="metric"><span>Estimated revenue from planned production</span><strong id="revenue">—</strong></div>
+<div class="metric"><span>Estimated project result</span><strong id="profit">—</strong></div>
+</div>
+<div class="status" id="priceRecommendation" style="display:none"></div>
+
+
+<div class="divider"></div>
+<div class="notes"><strong>Important:</strong> Minimum order quantities for raw materials and packaging components may be higher than the quantity required for your initial production run. Where materials are available from existing stock, this may not affect your budget. Otherwise, additional quantities may need to be purchased.</div>
+<div class="disclaimer"><strong>Disclaimer:</strong> This calculator provides an indicative estimate for budgeting purposes only. It does not constitute an offer, quotation or binding price proposal. The estimated range is intended to illustrate potential cost variation and should not be interpreted as a guaranteed price range. The commercial result is a simplified estimate based on the planned retail price and calculated project costs. Formula and packaging costs can vary significantly depending on the client's specific requirements and choices. As A&T Formulation provides bespoke product development, the final ingredient and packaging costs will depend on the specifications selected for the individual product. The retail-price assessment is based only on the estimated recurring cost per unit; one-time development, testing, regulatory, design and trademark costs are treated as initial investment costs. The calculator does not include other costs that may arise, such as shipping and warehousing costs, marketing and customer acquisition costs, business operating expenses, taxes, distribution or retailer margins, payment fees, or other project-specific and business-related expenses.</div>
+<div class="cta"><strong>Want a more accurate estimate?</strong>Your actual project cost depends on the final formulation, raw materials, packaging specifications, testing requirements and production details.<br><br><a href="https://www.atformulation.com/contact" target="_blank" rel="noopener"><strong>Talk to A&amp;T Formulation about your project.</strong></a></div>
+</div>
+
+<button class="reset" id="reset" type="button">Reset calculator</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const calculator=document.getElementById("calculator");
+const submitButton=document.querySelector(".calculate");
+const productType=document.getElementById("productType");
+const size=document.getElementById("size");
+const sizeUnit=document.getElementById("sizeUnit");
+const design=document.getElementById("design");
+const designValue=document.getElementById("designValue");
+const total=document.getElementById("total");
+const unit=document.getElementById("unit");
+const metrics=document.getElementById("commercialMetrics");
+const revenueEl=document.getElementById("revenue");
+const profitEl=document.getElementById("profit");
+const priceRecommendation=document.getElementById("priceRecommendation");
+const submissionStatus=document.getElementById("submissionStatus");
+
+// Replace YOUR_FORM_ID with the Formspree form ID created for this calculator.
+const FORMSPREE_ENDPOINT="https://formspree.io/f/xdenqqyp";
+
+
+
+const euro=n=>"€"+Math.round(n).toLocaleString("en-US");
+const euro2=n=>"€"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function syncStandardSize(){
+const selected=productType.options[productType.selectedIndex];
+const standard=Number(selected.dataset.size);
+size.value=standard;
+document.getElementById("standardSizeHelp").textContent=
+"Reference size for this product type: "+standard+" "+sizeUnit.value+". A different size will adjust the estimated ingredient cost.";
+}
+
+function ingredientCost(){
+const selected=productType.options[productType.selectedIndex];
+const base=Number(selected.value);
+const standard=Number(selected.dataset.size);
+let actual=Number(size.value);
+if(!Number.isFinite(actual)||actual<=0)actual=standard;
+actual=Math.max(5,Math.min(2000,actual));
+size.value=actual;
+return base*(actual/standard);
+}
+
+productType.addEventListener("change",syncStandardSize);
+sizeUnit.addEventListener("change",function(){
+document.getElementById("standardSizeHelp").textContent=
+"The reference size is shown in the selected unit. The estimate adjusts when you enter a different size.";
+});
+
+design.addEventListener("input",()=>{designValue.textContent=euro(Number(design.value));});
+
+submitButton.addEventListener("click",async function(){
+submissionStatus.textContent="";
+submissionStatus.style.color="";
+
+const firstName=document.getElementById("leadFirstName");
+const lastName=document.getElementById("leadLastName");
+const email=document.getElementById("leadEmail");
+const consent=document.getElementById("consent");
+
+if(!firstName.value.trim()||!lastName.value.trim()||!email.value.trim()||!email.checkValidity()||!consent.checked){
+submissionStatus.textContent="Please complete your name, email address and consent before calculating your budget.";
+submissionStatus.style.color="#9b2c2c";
+return;
+}
+
+submitButton.disabled=true;
+submitButton.style.opacity=".7";
+
+let q=parseInt(document.getElementById("quantity").value,10);
+if(!Number.isFinite(q)||q<1000)q=1000;
+if(q>100000)q=100000;
+document.getElementById("quantity").value=q;
+
+let retail=Number(document.getElementById("retailPrice").value);
+if(!Number.isFinite(retail)||retail<0)retail=0;
+document.getElementById("retailPrice").value=retail||"";
+
+let oneTime=Number(document.getElementById("development").value);
+oneTime+=650;
+
+if(document.getElementById("micro").checked)oneTime+=60;
+if(document.getElementById("challenge").checked)oneTime+=230;
+if(document.getElementById("stability").checked)oneTime+=280;
+
+const skin=document.querySelector('input[name="skin"]:checked').value;
+if(document.getElementById("derm").checked)oneTime+=skin==="sensitive"?300:250;
+if(document.getElementById("inuse").checked)oneTime+=skin==="sensitive"?825:675;
+
+if(document.getElementById("trademark").checked)oneTime+=1200;
+oneTime+=Number(design.value);
+oneTime+=Number(document.getElementById("markets").value)*2000;
+
+const formula=ingredientCost();
+let packaging=Number(document.querySelector('input[name="pack"]:checked').value);
+if(document.getElementById("colour").checked)packaging+=.5;
+if(document.getElementById("printing").checked)packaging+=.5;
+
+const manufacturing=q>=2000?.8:1;
+const box=document.getElementById("box").checked?.7:0;
+
+const recurringUnit=formula+packaging+manufacturing+box;
+const recurringTotal=q*recurringUnit;
+const baseTotal=oneTime+recurringTotal;
+
+const low=baseTotal*.8;
+const high=baseTotal*1.2;
+
+total.textContent=euro(low)+"–"+euro(high);
+unit.textContent=euro2(recurringUnit*.8)+"–"+euro2(recurringUnit*1.2);
+
+if(retail>0){
+const revenue=q*retail;
+const lowResult=revenue-high;
+const highResult=revenue-low;
+
+metrics.style.display="grid";
+revenueEl.textContent=euro(revenue);
+profitEl.textContent=(lowResult>=0?"+":"")+euro(lowResult)+" to "+(highResult>=0?"+":"")+euro(highResult);
+
+// Retail-price recommendation uses the recurring production cost per unit only.
+// One-time development, testing, regulatory, design and trademark costs are excluded.
+const midpointUnitCost=recurringUnit;
+const retailMultiple=retail>0 ? (retail / midpointUnitCost) : 0;
+
+priceRecommendation.style.display="block";
+if(retailMultiple >= 4){
+    priceRecommendation.className="status good";
+    priceRecommendation.innerHTML="<strong>Your planned retail price looks well positioned.</strong><br>We use a 4× retail price-to-unit-cost benchmark, which may leave sufficient margin for additional costs such as shipping, warehousing, marketing and customer acquisition.";
+}else{
+    priceRecommendation.className="status bad";
+    priceRecommendation.innerHTML="<strong>Your planned retail price may be too low for this cost structure.</strong><br>We use a 4× retail price-to-unit-cost benchmark to allow room for additional costs such as shipping, warehousing, marketing and customer acquisition.";
+}
+
+}else{
+metrics.style.display="none";
+priceRecommendation.style.display="none";
+}
+
+
+// Populate Webflow form fields with the calculation details before the native form submission.
+const selectedProduct=productType.options[productType.selectedIndex];
+const selectedPack=document.querySelector('input[name="pack"]:checked');
+const selectedSkin=document.querySelector('input[name="skin"]:checked');
+const tests=[];
+if(document.getElementById("micro").checked)tests.push("Microbiological testing");
+if(document.getElementById("challenge").checked)tests.push("Challenge testing");
+if(document.getElementById("stability").checked)tests.push("Stability testing");
+if(document.getElementById("derm").checked)tests.push("Dermatological testing");
+if(document.getElementById("inuse").checked)tests.push("In-use testing");
+
+document.getElementById("hFullName").value=(document.getElementById("leadFirstName").value+" "+document.getElementById("leadLastName").value).trim();
+document.getElementById("hRetail").value=retail ? "€"+retail.toFixed(2) : "";
+document.getElementById("hQuantity").value=String(q);
+document.getElementById("hProduct").value=selectedProduct.textContent.trim();
+document.getElementById("hSize").value=size.value+" "+sizeUnit.value;
+document.getElementById("hDevelopment").value=document.getElementById("development").selectedOptions[0].textContent.trim();
+document.getElementById("hPackaging").value=selectedPack ? selectedPack.nextElementSibling.textContent.trim() : "";
+document.getElementById("hColour").value=document.getElementById("colour").checked ? "Yes" : "No";
+document.getElementById("hPrinting").value=document.getElementById("printing").checked ? "Yes" : "No";
+document.getElementById("hBox").value=document.getElementById("box").checked ? "Yes" : "No";
+document.getElementById("hTests").value=tests.length ? tests.join(", ") : "None selected";
+document.getElementById("hSkin").value=selectedSkin ? (selectedSkin.value==="sensitive" ? "Sensitive skin" : "Normal skin") : "";
+document.getElementById("hMarkets").value=document.getElementById("markets").selectedOptions[0].textContent.trim();
+document.getElementById("hTrademark").value=document.getElementById("trademark").checked ? "Yes" : "No";
+document.getElementById("hDesign").value=euro(Number(design.value));
+document.getElementById("hInvestment").value=euro(low)+"–"+euro(high);
+document.getElementById("hUnitCost").value=euro2(recurringUnit*.8)+"–"+euro2(recurringUnit*1.2);
+document.getElementById("hRevenue").value=retail>0 ? euro(q*retail) : "Not provided";
+const hiddenRevenue=retail>0 ? q*retail : 0;
+const hiddenLowResult=retail>0 ? hiddenRevenue-high : 0;
+const hiddenHighResult=retail>0 ? hiddenRevenue-low : 0;
+const hiddenRetailMultiple=retail>0 ? retail/recurringUnit : 0;
+document.getElementById("hProjectResult").value=retail>0 ? ((hiddenLowResult>=0?"+":"")+euro(hiddenLowResult)+" to "+(hiddenHighResult>=0?"+":"")+euro(hiddenHighResult)) : "Not calculated";
+document.getElementById("hPriceAssessment").value=retail>0 ? (hiddenRetailMultiple>=4 ? "Your planned retail price looks well positioned." : "Your planned retail price may be too low for this cost structure.") : "Not assessed";
+
+const submissionData = new FormData();
+submissionData.append("First name", firstName.value.trim());
+submissionData.append("Last name", lastName.value.trim());
+submissionData.append("email", email.value.trim());
+submissionData.append("Consent", "I agree to Terms and conditions and Privacy Policy.");
+submissionData.append("Calculator", "Skincare Product Budget Calculator");
+submissionData.append("Planned retail price", document.getElementById("hRetail").value);
+submissionData.append("Planned production quantity", document.getElementById("hQuantity").value);
+submissionData.append("Product type", document.getElementById("hProduct").value);
+submissionData.append("Product size", document.getElementById("hSize").value);
+submissionData.append("Formulation complexity", document.getElementById("hDevelopment").value);
+submissionData.append("Primary packaging", document.getElementById("hPackaging").value);
+submissionData.append("Custom colouring", document.getElementById("hColour").value);
+submissionData.append("Custom printing", document.getElementById("hPrinting").value);
+submissionData.append("Product box", document.getElementById("hBox").value);
+submissionData.append("Testing selected", document.getElementById("hTests").value);
+submissionData.append("Test subject skin type", document.getElementById("hSkin").value);
+submissionData.append("Additional target markets", document.getElementById("hMarkets").value);
+submissionData.append("Trademark registration", document.getElementById("hTrademark").value);
+submissionData.append("Graphic design budget", document.getElementById("hDesign").value);
+submissionData.append("Estimated initial investment", document.getElementById("hInvestment").value);
+submissionData.append("Estimated cost per unit", document.getElementById("hUnitCost").value);
+submissionData.append("Estimated revenue", document.getElementById("hRevenue").value);
+submissionData.append("Estimated project result", document.getElementById("hProjectResult").value);
+submissionData.append("Price assessment", document.getElementById("hPriceAssessment").value);
+submissionData.append("_subject", "New Skincare Budget Calculator Lead");
+
+try{
+if(FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")){
+throw new Error("Formspree form ID has not been configured yet.");
+}
+const response=await fetch(FORMSPREE_ENDPOINT,{
+method:"POST",
+body:submissionData,
+headers:{"Accept":"application/json"}
+});
+if(!response.ok){
+const data=await response.json().catch(()=>null);
+throw new Error(data?.error || "The submission could not be sent.");
+}
+submissionStatus.textContent="Thank you. Your calculation is ready.";
+submissionStatus.style.color="#2d6a4f";
+document.getElementById("result").scrollIntoView({behavior:"smooth",block:"nearest"});
+}catch(error){
+submissionStatus.textContent=error.message==="Formspree form ID has not been configured yet."
+?"The calculator is ready, but the form email connection still needs to be configured."
+:"We could not send your details. Please try again.";
+submissionStatus.style.color="#9b2c2c";
+}finally{
+submitButton.disabled=false;
+submitButton.style.opacity="1";
+}
+});
+
+document.getElementById("reset").addEventListener("click",function(){
+calculator.querySelectorAll("input,select").forEach(el=>{ if(el.type==="hidden") el.value=""; });
+syncStandardSize();
+design.value=1500;
+designValue.textContent="€1,500";
+total.textContent="—";
+unit.textContent="—";
+metrics.style.display="none";
+priceRecommendation.style.display="none";
+submissionStatus.textContent="";
+});
+
+syncStandardSize();
+})();
+</script>
+</body>
+</html>
